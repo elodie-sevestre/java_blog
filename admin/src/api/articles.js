@@ -20,3 +20,10 @@ export async function fetchRecentArticles() {
   }
   return response.json();
 }
+
+export async function fetchPublishedArticles() {
+  const response = await fetch(`${API_URL}/articles`);
+  if (!response.ok) throw new Error(`Erreur HTTP ${response.status}`);
+
+  return response.json();
+}

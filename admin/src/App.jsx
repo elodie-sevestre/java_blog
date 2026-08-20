@@ -3,7 +3,7 @@ import PageHeader from "./components/PageHeader.jsx";
 import ArticleList from "./components/ArticleList.jsx";
 import LoadingMessage from "./components/LoadingMessage.jsx";
 import { fetchRecentArticles } from "./api/articles.js";
-// import { articleSample } from "./data/articlesSample.js";
+// import { fetchPublishedArticles } from "./api/articles.js";
 import "./App.css";
 
 /**
@@ -12,9 +12,6 @@ import "./App.css";
  */
 
 function App() {
-  // données en dur - étape 04 : viendront de l'API
-  // const articles = articleSample;
-
   const [articles, setArticles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -24,9 +21,12 @@ function App() {
       try {
         setIsLoading(true);
         setError(null);
+
         // tester affichage du message de chargement
         // await new Promise((resolve) => setTimeout(resolve, 10000));
+
         const data = await fetchRecentArticles();
+        // const data = await fetchPublishedArticles();
         setArticles(data);
       } catch (err) {
         console.error(err);
