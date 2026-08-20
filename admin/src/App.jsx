@@ -1,16 +1,42 @@
+import { useState, useEffect } from "react";
 import PageHeader from "./components/PageHeader.jsx";
 import ArticleList from "./components/ArticleList.jsx";
-import { articleSample } from "./data/articlesSample.js";
+import LoadingMessage from "./components/LoadingMessage.jsx";
+import { fetchRecentArticles } from "./api/articles.js";
+// import { articleSample } from "./data/articlesSample.js";
 import "./App.css";
 
 /**
  * App - racine du back-office.
- * Rôle : posséder les données (ici en dur) et passer des props aux enfants.
+ * Rôle : charger les articles (API), gérer loading/erreur, âsser des props aux enfants.
  */
 
 function App() {
   // données en dur - étape 04 : viendront de l'API
-  const articles = articleSample;
+  // const articles = articleSample;
+
+  const [articles, setArticles] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function loadArticles() {
+      try {
+        setIsLoading(true);
+        setError(null);
+        // tester affichage du message de chargement
+        // await new Promise((resolve) => setTimeout(resolve, 10000));
+        const data = await fetchRecentArticles();
+        setArticles(data);
+      } catch (err) {
+        console.error(err);
+        setError(err.message || "Impossible de joindre l'API.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadArticles();
+  }, []);
 
   // callbacks - étape 05-06 : ouvrir formulaire ou appeler DELETE
   function handleEdit(id) {
@@ -24,11 +50,15 @@ function App() {
     <div className="app">
       <PageHeader title="Back-office - Blog Java" />
       <main>
-        <ArticleList
-          articles={articles}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        {isLoading && <LoadingMessage />}
+        {error && <p className="error-message">{error}</p>}
+        {!isLoading && !error && (
+          <ArticleList
+            articles={articles}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        )}
       </main>
     </div>
   );

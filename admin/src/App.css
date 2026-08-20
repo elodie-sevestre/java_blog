@@ -44,3 +44,17 @@
   color: #818;
   font-style: italic;
 }
+
+/* message de chargement */
+
+.loading-message {
+  color: #666;
+  font-style: italic;
+}
+
+.error-message {
+  color: #b00020;
+  background: #ffeaea;
+  padding: 0.75rem;
+  border-radius: 6px;
+}
