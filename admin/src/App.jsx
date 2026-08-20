@@ -1,29 +1,35 @@
-import { useEffect, useState } from "react";
-
-const API_URL = "http://localhost:8080";
+import PageHeader from "./components/PageHeader.jsx";
+import ArticleList from "./components/ArticleList.jsx";
+import { articleSample } from "./data/articlesSample.js";
+import "./App.css";
 
 /**
- * App — composant racine du back-office.
- * Pour l'instant : un titre seulement. Les listes et formulaires viendront aux étapes 03–05.
+ * App - racine du back-office.
+ * Rôle : posséder les données (ici en dur) et passer des props aux enfants.
  */
+
 function App() {
-  // useState = « mémoire » du composant : ici, la liste d'articles (vide au début)
-  const [articles, setArticles] = useState([]);
+  // données en dur - étape 04 : viendront de l'API
+  const articles = articleSample;
 
-  // useEffect = « fais ceci une fois au chargement de la page »
-  useEffect(() => {
-    fetch(`${API_URL}/articles`)
-      .then((response) => response.json())
-      .then((data) => setArticles(data))
-      .catch((error) => console.error("Erreur fetch :", error));
-  }, []);
+  // callbacks - étape 05-06 : ouvrir formulaire ou appeler DELETE
+  function handleEdit(id) {
+    console.log("modifier l'article id =", id);
+  }
 
+  function handleDelete(id) {
+    console.log("supprimer l'article id =", id);
+  }
   return (
     <div className="app">
-      <h1>Back-office — Blog Java</h1>
-      <p>
-        Nombre d&apos;articles publiés reçus de l&apos;API : {articles.length}
-      </p>
+      <PageHeader title="Back-office - Blog Java" />
+      <main>
+        <ArticleList
+          articles={articles}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      </main>
     </div>
   );
 }
