@@ -6,6 +6,10 @@ spring:
     username: postgres
     password: ${POSTGRES_PASSWORD:postgres}
 
+server:
+  error:
+    include-message: always
+
 jwt:
   # Secret de signature — MINIMUM ~32 caractères pour HS256. En prod : variable d'environnement !
   secret: "dev-secret-java-blog-changez-moi-32chars"
