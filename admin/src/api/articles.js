@@ -1,44 +1,42 @@
 /**
- * article.js - appels HTTP vers l'API Srping Boot (partie 03).
- * Toutes les fonctions fetch du back-office passent par ici.
+ * articles.js — appels HTTP vers l'API Spring Boot.
  */
 
-// adresse de l'aPI Java - même machine, port 8080(pas 5173!)
+import { getAuthHeaders } from "./auth.js";
+
 export const API_URL = "http://localhost:8080";
 
-/**
- * Récupère les 5 articles les plus récents (GET /articles/recents).
- * @returns {Promise<Array>} tableau d'objets { id, titre, contenu, publie, date}
- */
+/** En-têtes JSON + Authorization pour /admin */
+function adminJsonHeaders() {
+  return {
+    "Content-Type": "application/json",
+    ...getAuthHeaders(),
+  };
+}
 
+/**
+ * Récupère les 5 articles les plus récents (GET public).
+ */
 export async function fetchRecentArticles() {
   const response = await fetch(`${API_URL}/articles/recents`);
 
-  // response.ok = true si status HTTP 200-299
   if (!response.ok) {
-    throw new Error(`Erreur HTTP ${response.status} sur /articles/recents`);
+    throw new Error(`Erreur HTTP ${response.status}`);
   }
-  return response.json();
-}
-
-export async function fetchPublishedArticles() {
-  const response = await fetch(`${API_URL}/articles`);
-  if (!response.ok) throw new Error(`Erreur HTTP ${response.status}`);
 
   return response.json();
 }
 
-/**
- * Crée un article (POST /admin/articles).
- * @param {{titre: string, contenu: string, userId: number}} payload
- */
 export async function createArticle(payload) {
   const response = await fetch(`${API_URL}/admin/articles`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: adminJsonHeaders(),
     body: JSON.stringify(payload),
   });
 
+  if (response.status === 401) {
+    throw new Error("Session expirée — reconnecte-toi.");
+  }
   if (!response.ok) {
     throw new Error(`Erreur HTTP ${response.status} lors de la création`);
   }
@@ -46,18 +44,16 @@ export async function createArticle(payload) {
   return response.json();
 }
 
-/**
- * Modifie un article (PUT /admin/articles/{id}).
- * @param {number} id
- * @param {{ titre: string, contenu: string, publie: boolean }} payload
- */
 export async function updateArticle(id, payload) {
   const response = await fetch(`${API_URL}/admin/articles/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: adminJsonHeaders(),
     body: JSON.stringify(payload),
   });
 
+  if (response.status === 401) {
+    throw new Error("Session expirée — reconnecte-toi.");
+  }
   if (!response.ok) {
     throw new Error(`Erreur HTTP ${response.status} lors de la modification`);
   }
@@ -65,18 +61,16 @@ export async function updateArticle(id, payload) {
   return response.json();
 }
 
-/**
- * Supprime un article (DELETE /admin/articles/{id}).
- * @param {number} id
- */
 export async function deleteArticle(id) {
   const response = await fetch(`${API_URL}/admin/articles/${id}`, {
     method: "DELETE",
+    headers: getAuthHeaders(),
   });
 
+  if (response.status === 401) {
+    throw new Error("Session expirée — reconnecte-toi.");
+  }
   if (!response.ok) {
     throw new Error(`Erreur HTTP ${response.status} lors de la suppression`);
   }
-
-  // 204 No Content — pas de corps JSON à lire
 }
