@@ -27,3 +27,40 @@ export async function fetchPublishedArticles() {
 
   return response.json();
 }
+
+/**
+ * Crée un article (POST /admin/articles).
+ * @param {{titre: string, contenu: string, userId: number}} payload
+ */
+export async function createArticle(payload) {
+  const response = await fetch(`${API_URL}/admin/articles`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Erreur HTTP ${response.status} lors de la création`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Modifie un article (PUT /admin/articles/{id}).
+ * @param {number} id
+ * @param {{ titre: string, contenu: string, publie: boolean }} payload
+ */
+export async function updateArticle(id, payload) {
+  const response = await fetch(`${API_URL}/admin/articles/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Erreur HTTP ${response.status} lors de la modification`);
+  }
+
+  return response.json();
+}

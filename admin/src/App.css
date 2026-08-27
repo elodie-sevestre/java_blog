@@ -58,3 +58,44 @@
   padding: 0.75rem;
   border-radius: 6px;
 }
+
+.article-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.article-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.article-form input[type="text"],
+.article-form textarea,
+.article-form input[type="number"] {
+  padding: 0.4rem;
+  font: inherit;
+}
+
+.checkbox-label {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.5rem !important;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.toolbar {
+  margin-bottom: 1rem;
+}

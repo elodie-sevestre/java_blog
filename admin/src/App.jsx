@@ -1,58 +1,130 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import PageHeader from "./components/PageHeader.jsx";
 import ArticleList from "./components/ArticleList.jsx";
+import ArticleForm from "./components/ArticleForm.jsx";
 import LoadingMessage from "./components/LoadingMessage.jsx";
-import { fetchRecentArticles } from "./api/articles.js";
-// import { fetchPublishedArticles } from "./api/articles.js";
+import {
+  fetchRecentArticles,
+  createArticle,
+  updateArticle,
+} from "./api/articles.js";
 import "./App.css";
 
 /**
  * App - racine du back-office.
  * Rôle : charger les articles (API), gérer loading/erreur, âsser des props aux enfants.
  */
-
 function App() {
   const [articles, setArticles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    async function loadArticles() {
-      try {
-        setIsLoading(true);
-        setError(null);
+  // "list" | "create" | "edit"
+  const [mode, setMode] = useState("list");
+  const [editingArticle, setEditingArticle] = useState(null);
 
-        // tester affichage du message de chargement
-        // await new Promise((resolve) => setTimeout(resolve, 10000));
-
-        const data = await fetchRecentArticles();
-        // const data = await fetchPublishedArticles();
-        setArticles(data);
-      } catch (err) {
-        console.error(err);
-        setError(err.message || "Impossible de joindre l'API.");
-      } finally {
-        setIsLoading(false);
-      }
+  const loadArticles = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await fetchRecentArticles();
+      setArticles(data);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Impossible de joindre l'API.");
+    } finally {
+      setIsLoading(false);
     }
-    loadArticles();
   }, []);
 
-  // callbacks - étape 05-06 : ouvrir formulaire ou appeler DELETE
+  useEffect(() => {
+    loadArticles();
+  }, [loadArticles]);
+
+  function showList() {
+    setMode("list");
+    setEditingArticle(null);
+  }
+
+  function showCreate() {
+    setMode("create");
+    setEditingArticle(null);
+  }
+
   function handleEdit(id) {
-    console.log("modifier l'article id =", id);
+    const article = articles.find((a) => a.id === id);
+    if (article) {
+      setEditingArticle(article);
+      setMode("edit");
+    }
+  }
+
+  async function handleCreateSubmit(payload) {
+    try {
+      await createArticle(payload);
+      await loadArticles();
+      showList();
+    } catch (err) {
+      alert(err.message || "Erreur à la création");
+    }
+  }
+
+  async function handleEditSubmit(payload) {
+    try {
+      await updateArticle(payload.id, {
+        titre: payload.titre,
+        contenu: payload.contenu,
+        publie: payload.publie,
+      });
+      await loadArticles();
+      showList();
+    } catch (err) {
+      alert(err.message || "Erreur à la modification");
+    }
   }
 
   function handleDelete(id) {
-    console.log("supprimer l'article id =", id);
+    console.log("DELETE — étape 06, id =", id);
   }
+
   return (
     <div className="app">
-      <PageHeader title="Back-office - Blog Java" />
+      <PageHeader title="Back-office — Blog Java" />
+
       <main>
-        {isLoading && <LoadingMessage />}
-        {error && <p className="error-message">{error}</p>}
-        {!isLoading && !error && (
+        {mode === "list" && (
+          <div className="toolbar">
+            <button type="button" onClick={showCreate}>
+              + Nouvel article
+            </button>
+          </div>
+        )}
+
+        {mode === "create" && (
+          <ArticleForm
+            key="create"
+            initialValues={null}
+            submitLabel="Créer"
+            onSubmit={handleCreateSubmit}
+            onCancel={showList}
+          />
+        )}
+
+        {mode === "edit" && editingArticle && (
+          <ArticleForm
+            key={editingArticle.id}
+            initialValues={editingArticle}
+            submitLabel="Enregistrer"
+            onSubmit={handleEditSubmit}
+            onCancel={showList}
+          />
+        )}
+
+        {mode === "list" && isLoading && <LoadingMessage />}
+
+        {mode === "list" && error && <p className="error-message">{error}</p>}
+
+        {mode === "list" && !isLoading && !error && (
           <ArticleList
             articles={articles}
             onEdit={handleEdit}
