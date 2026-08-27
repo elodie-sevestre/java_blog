@@ -1,28 +1,52 @@
 package fr.ada.java_blog.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final JwtAuthFilter jwtAuthFilter;
+
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Pas de session HTTP — on utilisera des JWT (stateless)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // CSRF désactivé : API REST consommée par React / curl (pas de formulaire HTML
-                // Spring)
                 .csrf(csrf -> csrf.disable())
-                // TEMPORAIRE étape 05-02 : tout est public. Étape 05-03 : on protège /admin/**
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+                .authorizeHttpRequests(auth -> auth
+                        // Preflight CORS (navigateur) — doit rester public
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // Login
+                        .requestMatchers("/auth/login").permitAll()
+                        // API publique (lecture articles, santé)
+                        .requestMatchers(
+                                "/articles/**",
+                                "/ping",
+                                "/db/**")
+                        .permitAll()
+                        // Back-office — token obligatoire
+                        .requestMatchers("/admin/**").authenticated()
+                        .anyRequest().permitAll())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> response
+                                .sendError(HttpServletResponse.SC_UNAUTHORIZED, "Non authentifié")))
+                .addFilterBefore(
+                        jwtAuthFilter,
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
