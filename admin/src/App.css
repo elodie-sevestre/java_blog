@@ -99,3 +99,39 @@
 .toolbar {
   margin-bottom: 1rem;
 }
+
+.feedback {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.feedback-success {
+  background: #e6f4ea;
+  border: 1px solid #34a853;
+  color: #1e4620;
+}
+
+.feedback-error {
+  background: #fce8e6;
+  border: 1px solid #ea4335;
+  color: #5f2120;
+}
+
+.feedback-close {
+  border: none;
+  background: transparent;
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.error-message {
+  color: #b00020;
+  padding: 0.5rem;
+}

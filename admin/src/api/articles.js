@@ -64,3 +64,19 @@ export async function updateArticle(id, payload) {
 
   return response.json();
 }
+
+/**
+ * Supprime un article (DELETE /admin/articles/{id}).
+ * @param {number} id
+ */
+export async function deleteArticle(id) {
+  const response = await fetch(`${API_URL}/admin/articles/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Erreur HTTP ${response.status} lors de la suppression`);
+  }
+
+  // 204 No Content — pas de corps JSON à lire
+}
